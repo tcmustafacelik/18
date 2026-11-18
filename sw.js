@@ -1,6 +1,6 @@
 /* 18 · çevrimdışı açılış: uygulamanın kendisi ve kütüphaneler telefonda saklanır.
    Veriler (GitHub API) asla önbelleğe alınmaz; onlar zaten uygulamanın kendi cihaz deposunda durur. */
-const AD = "tsk-arsiv-v14";
+const AD = "tsk-arsiv-v15";
 self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(AD).then(c => c.addAll(["./", "./manifest.webmanifest", "./icon-m18-192.png", "./kisayol2-soru.png", "./kisayol2-antk.png", "./fonts/LiberationSerif-Regular.ttf", "./fonts/LiberationSerif-Bold.ttf", "./fonts/LiberationSans-Regular.ttf", "./fonts/LiberationSans-Bold.ttf"])).catch(() => {})); });
 self.addEventListener("activate", e => e.waitUntil((async () => { for(const k of await caches.keys()) if(k !== AD) await caches.delete(k); await self.clients.claim(); })()));
 self.addEventListener("fetch", e => {
@@ -11,11 +11,14 @@ self.addEventListener("fetch", e => {
   if(u.origin === location.origin && r.mode === "navigate"){   /* sayfa: telefonda saklanan kopya HEMEN açılır; yeni sürüm arka planda iner.
        İnince açık sayfaya "yeni-surum" haberi gider (sayfa "Yeni sürüm hazır · Yenile" gösterir). Saklanan yoksa internetten gelir. */
     e.respondWith((async () => {
-      const c = await caches.open(AD), m = await c.match("./");
+      /* S793: telefon depolaması 2,5 sn içinde yanıt vermezse saklanan kopya beklenmez, sayfa internetten açılır */
+      const bekle = (p, ms) => Promise.race([p, new Promise(z => setTimeout(() => z(null), ms))]);
+      const c = await bekle(caches.open(AD), 2500), m = c ? await bekle(c.match("./"), 2500) : null;
+      if(!c) return fetch(r, { cache: "no-cache" }).catch(() => new Response("Bağlantı yok", { status: 503 }));
       const ag = fetch(r, { cache: "no-cache" }).then(async res => {
         if(res.ok && res.type === "basic"){ const eT = m && (m.headers.get("etag") || m.headers.get("last-modified")), yT = res.headers.get("etag") || res.headers.get("last-modified");
-          await c.put("./", res.clone());
-          if(m && eT && yT && eT !== yT){ for(const k of await self.clients.matchAll({ type: "window" })) k.postMessage({ tip: "yeni-surum" }); } }
+          const kopya = res.clone();   /* saklama arka planda: depolama yavaşsa sayfa onu beklemez */
+          e.waitUntil(c.put("./", kopya).then(async () => { if(m && eT && yT && eT !== yT){ for(const k of await self.clients.matchAll({ type: "window" })) k.postMessage({ tip: "yeni-surum" }); } }).catch(() => {})); }
         return res; });
       if(m){ e.waitUntil(ag.catch(() => {})); return m; }
       return ag.catch(() => caches.match("./"));
