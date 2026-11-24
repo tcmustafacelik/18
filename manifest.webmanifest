@@ -1,0 +1,62 @@
+{
+  "name": "18",
+  "short_name": "18",
+  "description": "Belge ve kayıt arşivi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F1F2F4",
+  "theme_color": "#F1F2F4",
+  "icons": [
+    {
+      "src": "icon-m18-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-m18-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-m18-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-m18-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ANTK · Askerî nezaket ve görgü kuralları",
+      "short_name": "ANTK",
+      "url": "./?ac=antk",
+      "icons": [
+        {
+          "src": "kisayol2-antk.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Günlük soru",
+      "short_name": "Soru",
+      "url": "./?ac=soru",
+      "icons": [
+        {
+          "src": "kisayol2-soru.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
